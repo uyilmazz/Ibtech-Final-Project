@@ -1,6 +1,6 @@
 package com.ibtech.inventory.business.constants.message;
 
-public class ResultMessage {
+public class InventoryResultMessage {
 	
 	public static String ErrorMessage = "An error occured!";
 	

@@ -7,15 +7,17 @@ import java.util.List;
 
 import com.ibtech.inventory.entities.Category;
 import com.ibtech.inventory.entities.Product;
+import com.ibtech.repository.BaseRepository;
 
 public class ProductRepository extends BaseRepository<Product>{
 	
 	public List<Product> getByCategory(int category_id) throws SQLException{
 		connect();
-		String sql = "Select * from products where category_id = ?";
+		String sql = "select p.id as id,p.\"name\" ,p.sales_price ,p.image_path,p.category_id ,c.\"name\" as category_name from products p join categories c on p.category_id = c.id  where p.category_id = ?";
 		PreparedStatement statement = connection.prepareStatement(sql);
 		statement.setInt(1, category_id);
 		ResultSet resultSet = statement.executeQuery();
+		disconnect();
 		List<Product> productList = parseList(resultSet);
 		return productList;
 	}
@@ -35,12 +37,13 @@ public class ProductRepository extends BaseRepository<Product>{
 	
 	public boolean update(Product product) throws SQLException {
 		connect();
-		String sql = "Update into products(name,sales_price,image_path,category_id) values(?,?,?,?)";
+		String sql = "Update products set name = ?,sales_price = ? , image_path = ? , category_id = ? where id = ?";
 		PreparedStatement statement = connection.prepareStatement(sql);
 		statement.setString(1, product.getProductName());
 		statement.setDouble(2, product.getSalesPrice());
 		statement.setString(3, product.getImagePath());
 		statement.setInt(4, product.getCategory().getCategoryId());
+		statement.setLong(5, product.getProductId());
 		int affected = statement.executeUpdate();
 		disconnect();
 		return affected > 0 ? true : false;
@@ -52,6 +55,7 @@ public class ProductRepository extends BaseRepository<Product>{
 		PreparedStatement statement = connection.prepareStatement(sql);
 		statement.setLong(1, productId);
 		int affected = statement.executeUpdate();
+		disconnect();
 		return affected > 0 ? true : false;
 	}
 	
@@ -62,9 +66,8 @@ public class ProductRepository extends BaseRepository<Product>{
 		String imagePath = resultSet.getString("image_path");
 		double salesPrice = resultSet.getDouble("sales_price");
 		int categoryId = resultSet.getInt("category_id");
-		CategoryRepository categoryRepository = new CategoryRepository();
-		String sql = "Select * from categories where id = ?";
-		Category category = categoryRepository.find(sql, categoryId);
+		String categoryName = resultSet.getString("category_name");
+		Category category = new Category(categoryId,categoryName);
 		Product product = new Product(productId,productName,imagePath,salesPrice);
 		product.setCategory(category);
 		return product;

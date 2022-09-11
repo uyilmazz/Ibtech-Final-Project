@@ -52,7 +52,7 @@ public class CategoryXml {
 	}
 	
 	private static Category elementToCategory(Element element) {
-		int categoryId = Integer.parseInt(element.getAttribute("id"));
+		int categoryId =element.getAttribute("id") != "" ? Integer.parseInt(element.getAttribute("id")) : 0;
 		String categoryName = XmlHelper.getSingleElementText(element, "categoryName", "");
 		Category category = new Category(categoryId,categoryName);
 		return category;

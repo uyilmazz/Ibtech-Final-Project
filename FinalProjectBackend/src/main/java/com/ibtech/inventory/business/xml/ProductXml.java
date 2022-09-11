@@ -16,6 +16,9 @@ public class ProductXml {
 		XmlHelper.addSingleElement(document, root, "productName", product.getProductName(), null, null);
 		XmlHelper.addSingleElement(document, root, "imagePath", product.getImagePath(), null, null);
 		XmlHelper.addSingleElement(document, root, "salesPrice", product.getSalesPrice(), null, null);
+		XmlHelper.addSingleElement(document, root, "category", null, "id", Integer.toString(product.getCategory().getCategoryId()));
+		Element categoryElement = (Element)root.getElementsByTagName("category").item(0);
+		XmlHelper.addSingleElement(document, categoryElement, "categoryName", product.getCategory().getCategoryName(), null, null);
 		return document;
 	}
 
@@ -24,10 +27,13 @@ public class ProductXml {
 		Element root = document.getDocumentElement();
 		for(int i = 0 ;i < products.size();i++) {
 			XmlHelper.addSingleElement(document, root, "product", null, "id", Long.toString(products.get(i).getProductId()));
-			Element element = (Element)document.getElementsByTagName("product").item(i);
-			XmlHelper.addSingleElement(document, element, "productName", products.get(i).getProductName(), null, null);
-			XmlHelper.addSingleElement(document, element, "imagePath", products.get(i).getImagePath(), null, null);
-			XmlHelper.addSingleElement(document, element, "salesPrice", products.get(i).getSalesPrice(), null, null);
+			Element productElement = (Element)root.getElementsByTagName("product").item(i);
+			XmlHelper.addSingleElement(document, productElement, "productName", products.get(i).getProductName(), null, null);
+			XmlHelper.addSingleElement(document, productElement, "imagePath", products.get(i).getImagePath(), null, null);
+			XmlHelper.addSingleElement(document, productElement, "salesPrice", products.get(i).getSalesPrice(), null, null);
+			XmlHelper.addSingleElement(document, productElement, "category", null, "id", Integer.toString(products.get(i).getCategory().getCategoryId()));
+			Element categoryElement = (Element)productElement.getElementsByTagName("category").item(0);
+			XmlHelper.addSingleElement(document, categoryElement, "categoryName", products.get(i).getCategory().getCategoryName(), null, null);
 		}
 		return document;
 	}

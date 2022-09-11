@@ -12,7 +12,7 @@ public class CategoryXml {
 	public static Document format(Category category) throws Exception {
 		Document document = XmlHelper.create("category");
 		Element root = document.getDocumentElement();
-		XmlHelper.addSingleElement(document, root, "categoryId", category.getCategoryId(), null, null);
+		root.setAttribute("id", Integer.toString(category.getCategoryId()));
 		XmlHelper.addSingleElement(document, root, "categoryName", category.getCategoryName(), null, null);
 		return document;
 	}
