@@ -5,6 +5,7 @@
 	import="com.ibtech.inventory.service.CategoryService,
 	com.ibtech.inventory.entities.Category"%>
 <%
+	boolean isLogin = session.getAttribute("userName") != null ? true : false;
 	CategoryService categoryService = new CategoryService();
 	List<Category> categories = categoryService.getAll();
 %>    
@@ -14,7 +15,13 @@
     <a class="navbar-brand">Shop Project</a>
     <form class="d-flex" role="search">
       <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-      <button class="btn btn-outline-success" type="submit">Search</button>
+      <button class="btn btn-outline-success me-2" type="submit">Search</button>
+		<% if(isLogin) {%>
+			<a href=".../../UserLogout.jsp" class="btn btn-outline-danger me-2">Logout</a>
+		<%}else{ %>
+			<a href=".../../UserLogin.jsp" class="btn btn-outline-danger me-2">Login</a>
+       		<a href=".../../UserRegister.jsp" class="btn btn-outline-danger me-2">Register</a>
+		<%} %>  
     </form>
   </div>
 </nav>

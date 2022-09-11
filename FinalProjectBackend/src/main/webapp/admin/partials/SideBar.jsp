@@ -13,6 +13,16 @@
                     Categories
                 </a>
             </li>
+             <li class="nav-item">
+                <a href="../cart/CartSummary.jsp" class="nav-link">
+                    Cart Summaries
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="../user/UserSummary.jsp" class="nav-link">
+                    Users
+                </a>
+            </li>
         </ul>
     </div>
 </nav>

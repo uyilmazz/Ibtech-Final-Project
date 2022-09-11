@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.ibtech.inventory.entities.Category;
+import com.ibtech.repository.BaseRepository;
 
 public class CategoryRepository extends BaseRepository<Category>{
 

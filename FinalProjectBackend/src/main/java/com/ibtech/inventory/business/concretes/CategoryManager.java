@@ -10,7 +10,7 @@ import com.ibtech.core.utilities.result.Result;
 import com.ibtech.core.utilities.result.SuccessDataResult;
 import com.ibtech.core.utilities.result.SuccessResult;
 import com.ibtech.inventory.business.abstracts.CategoryService;
-import com.ibtech.inventory.business.constants.message.ResultMessage;
+import com.ibtech.inventory.business.constants.message.InventoryResultMessage;
 import com.ibtech.inventory.entities.Category;
 import com.ibtech.inventory.repository.CategoryRepository;
 
@@ -40,7 +40,7 @@ public class CategoryManager implements CategoryService{
 			if(category != null) {
 				return new SuccessDataResult<Category>(category);
 			}else {
-				return new ErrorDataResult<Category>(ResultMessage.CategoryNotFound);
+				return new ErrorDataResult<Category>(InventoryResultMessage.CategoryNotFound);
 			}
 		}catch(SQLException e) {
 			return new ErrorDataResult<Category>(e.getMessage());
@@ -53,10 +53,10 @@ public class CategoryManager implements CategoryService{
 			String sql = "Select * from categories where name = ?";
 			Category dbCategory = categoryRepository.findByName(sql, category.getCategoryName());
 			if(dbCategory != null) {
-				return new ErrorResult(ResultMessage.CategoryAlreadyExist);
+				return new ErrorResult(InventoryResultMessage.CategoryAlreadyExist);
 			}
 			boolean inserted = categoryRepository.add(dbCategory);
-			return inserted ? new SuccessResult(ResultMessage.CategoryAdded) : new ErrorResult(ResultMessage.CategoryCouldNotAdded);
+			return inserted ? new SuccessResult(InventoryResultMessage.CategoryAdded) : new ErrorResult(InventoryResultMessage.CategoryCouldNotAdded);
 		} catch (SQLException e) {
 			return new ErrorDataResult<Category>(e.getMessage());
 		}	
@@ -72,10 +72,10 @@ public class CategoryManager implements CategoryService{
 			String sql = "Select * from categories where name = ?";
 			Category dbCategory = categoryRepository.findByName(sql, category.getCategoryName());
 			if(dbCategory != null) {
-				return new ErrorResult(ResultMessage.CategoryAlreadyExist);
+				return new ErrorResult(InventoryResultMessage.CategoryAlreadyExist);
 			}
 			boolean updated = categoryRepository.update(category);
-			return updated ? new SuccessResult(ResultMessage.CategoryUpdated) : new ErrorResult(ResultMessage.CategoryCouldNotUpdated);
+			return updated ? new SuccessResult(InventoryResultMessage.CategoryUpdated) : new ErrorResult(InventoryResultMessage.CategoryCouldNotUpdated);
 			
 		}catch(Exception e) {
 			return new ErrorResult(e.getMessage());
@@ -90,7 +90,7 @@ public class CategoryManager implements CategoryService{
 				return new ErrorResult();
 			}
 			boolean deleted = categoryRepository.delete(categoryId);
-			return deleted ? new SuccessResult(ResultMessage.CategoryDeleted) : new ErrorResult(ResultMessage.CategoryCouldNotDeleted);
+			return deleted ? new SuccessResult(InventoryResultMessage.CategoryDeleted) : new ErrorResult(InventoryResultMessage.CategoryCouldNotDeleted);
 		}catch(Exception e) {
 			return new ErrorResult(e.getMessage());
 		}

@@ -1,4 +1,4 @@
-package com.ibtech.inventory.repository;
+package com.ibtech.repository;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
