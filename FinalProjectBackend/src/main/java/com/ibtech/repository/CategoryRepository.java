@@ -1,14 +1,29 @@
-package com.ibtech.inventory.repository;
+package com.ibtech.repository;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
-import com.ibtech.inventory.entities.Category;
-import com.ibtech.repository.BaseRepository;
+import com.ibtech.entities.Category;
 
 public class CategoryRepository extends BaseRepository<Category>{
 
+	public List<Category> getAll() throws SQLException{
+		String sql = "Select * from categories";
+		return super.listAll(sql);
+	}
+	
+	public Category getById(int categoryId) throws SQLException {
+		String sql = "Select * from categories where id = ?";
+		return super.find(sql, categoryId);
+	}
+	
+	public Category findByName(String name) throws SQLException {
+		String sql = "Select * from categories where name = ?";
+		return super.findByName(sql, name);
+	}
+	
 	public boolean add(Category category) throws SQLException {
 		connect();		
 		String sql = "insert into categories(name) values(?)";

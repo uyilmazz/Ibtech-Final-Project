@@ -8,9 +8,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.w3c.dom.Document;
-
 import com.ibtech.business.abstracts.CartProductService;
 import com.ibtech.business.concretes.CartProductManager;
 import com.ibtech.business.xml.CartProductXml;
@@ -26,8 +24,14 @@ public class CartProductFindAllServlet extends HttpServlet{
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		try {
 			CartProductService cartProductService = new CartProductManager(new CartProductRepository());
-			DataResult<List<CartProduct>> cartProducts = cartProductService.getAll();
-			Document document = CartProductXml.formatAll(cartProducts.getData());
+			DataResult<List<CartProduct>> result = cartProductService.getAll();
+			Document document;
+			if(result.isSuccess()) {
+				document = CartProductXml.formatAll(result.getData());
+				response.setStatus(200);
+			}else {
+				document = XmlHelper.resultDocument(response, result, 400);
+			}
 			response.setContentType("application/xml;charset=UTF-8");
 			XmlHelper.dump(document, response.getOutputStream());
 		} catch (Exception e) {

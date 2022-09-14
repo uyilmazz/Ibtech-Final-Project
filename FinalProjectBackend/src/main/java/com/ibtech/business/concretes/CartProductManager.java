@@ -23,10 +23,7 @@ public class CartProductManager implements CartProductService {
 	@Override
 	public DataResult<List<CartProduct>> getAll() {
 		try {
-			String sql = "select cp.*,p.\"name\" as product_name,p.sales_price as product_sales_price,p.image_path as product_image_path, c.id  as category_id,c.\"name\" as category_name\r\n"
-					+ "from cart_products cp join products p on cp.product_id = p.id join categories c on c.id  = p.category_id";
-			
-			List<CartProduct> cartProductList = cartProductRepository.listAll(sql);
+			List<CartProduct> cartProductList = cartProductRepository.getAll();
 			return new SuccessDataResult<List<CartProduct>>(cartProductList);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -47,11 +44,8 @@ public class CartProductManager implements CartProductService {
 
 	@Override
 	public DataResult<CartProduct> getById(long cartProductId) {
-		try {
-			String sql = "select cp.*,p.\"name\" as product_name,p.sales_price as product_sales_price,p.image_path as product_image_path, c.id  as category_id,c.\"name\" as category_name\r\n"
-					+ "from cart_products cp join products p on cp.product_id = p.id join categories c on c.id  = p.category_id where cp.id = ?";
-			
-			CartProduct cartProduct = cartProductRepository.find(sql, cartProductId);
+		try {	
+			CartProduct cartProduct = cartProductRepository.getById(cartProductId);
 			return cartProduct != null ? new SuccessDataResult<CartProduct>(cartProduct) : new ErrorDataResult<CartProduct>(ShoppingResultMessage.CartProductNotFound);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -60,14 +54,24 @@ public class CartProductManager implements CartProductService {
 	}
 	
 	@Override
-	public DataResult<Long> add(CartProduct cartProduct) {
+	public DataResult<CartProduct> add(CartProduct cartProduct) {
 		try {
-			System.out.println(cartProduct.getCartId() +" " +cartProduct.getSalesPrice() + " "  + cartProduct.getSalesQuantity() +" " + cartProduct.getTaxRate() + " " + cartProduct.getLineAmount() + " " + cartProduct.getProduct().getProductId() );
 			long cartProductId = cartProductRepository.add(cartProduct);
-			return  cartProductId > 0 ? new SuccessDataResult<Long>(cartProductId,ShoppingResultMessage.CartProductAdded) : new ErrorDataResult<Long>(cartProductId,ShoppingResultMessage.CartProductCouldNotAdded);
+			return  cartProductId > 0 ? new SuccessDataResult<CartProduct>(getById(cartProductId).getData(),ShoppingResultMessage.CartProductAdded) : new ErrorDataResult<CartProduct>(ShoppingResultMessage.CartProductCouldNotAdded);
 		}catch(Exception e) {
 			e.printStackTrace();
-			return new ErrorDataResult<Long>(ShoppingResultMessage.ErrorMessage);
+			return new ErrorDataResult<CartProduct>(ShoppingResultMessage.ErrorMessage);
+		}
+	}
+	
+	@Override
+	public Result updateBulk(List<CartProduct> cartProducts) {
+		try {
+			boolean addBulkResult = cartProductRepository.updateBulk(cartProducts);
+			return  addBulkResult ? new SuccessResult(ShoppingResultMessage.CartProductAdded) : new ErrorResult(ShoppingResultMessage.CartProductCouldNotAdded);
+		}catch(Exception e) {
+			e.printStackTrace();
+			return new ErrorResult(ShoppingResultMessage.ErrorMessage);
 		}
 	}
 
@@ -92,7 +96,7 @@ public class CartProductManager implements CartProductService {
 		try {
 			DataResult<CartProduct> result = getById(cartProductId);
 			if(result.isSuccess()) {
-				boolean deleted = cartProductRepository.delete(cartProductId);
+				boolean deleted = cartProductRepository.delete(result.getData());
 				return deleted ? new SuccessResult(ShoppingResultMessage.CartProductDeleted) : new ErrorResult(ShoppingResultMessage.CartProductCouldNotDeleted);
 			}else {
 				return new ErrorResult(ShoppingResultMessage.CartProductNotFound);
@@ -102,7 +106,4 @@ public class CartProductManager implements CartProductService {
 			return new ErrorResult(ShoppingResultMessage.ErrorMessage);
 		}
 	}
-
-	
-
 }

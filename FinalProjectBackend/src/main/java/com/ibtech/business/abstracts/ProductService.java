@@ -1,14 +1,15 @@
-package com.ibtech.inventory.business.abstracts;
+package com.ibtech.business.abstracts;
 
 import java.util.List;
 
 import com.ibtech.core.utilities.result.DataResult;
 import com.ibtech.core.utilities.result.Result;
-import com.ibtech.inventory.entities.Product;
+import com.ibtech.entities.Product;
 
 public interface ProductService {
 	public DataResult<List<Product>> getAll();
 	public DataResult<List<Product>> getByCategory(int category_id);
+	public DataResult<List<Product>> getByLimit(int limit);
 	public DataResult<Product> getById(long productId);
 	
 	public Result add(Product product);

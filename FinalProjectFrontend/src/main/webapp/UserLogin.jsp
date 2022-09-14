@@ -1,36 +1,61 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-
-<%!
-	public enum Status { Initialize,Failed }
-%>
 <%@ page
 	import="com.ibtech.user.service.UserService,
+	com.ibtech.shopping.service.CartService,
+	com.ibtech.shopping.service.CartProductService,
+	com.ibtech.core.utilities.result.*,
+	java.util.List,
+	com.ibtech.shopping.entities.*,
+	com.ibtech.core.utilities.helper.ParseHelper,
 	com.ibtech.user.entities.User"%>
 <%
 String userName = "";
 String password = "";
-String message = "";
-Status loginStatus = Status.Initialize;
-try {
+String message = "Please enter your Username and password!";
+DataResult<User> loginResult = null;
+	if(session.getAttribute("userName") != null){
+		response.sendRedirect("MainPage.jsp");
+	}
 	if ((request.getParameter("login")) != null) {
 		userName = request.getParameter("userName");
 		password = request.getParameter("password");
 		UserService userService = new UserService();
 		User loginUser = new User(0,userName,password);
-		User user = userService.login(loginUser);
-		if ((user != null )) {
-			session.setAttribute("userName", user.getName());
-			response.sendRedirect("MainPage.jsp");
-		} else {
-			message = "The user name or password is incorrect!";
-			loginStatus = Status.Failed;
-		}
+		loginResult = userService.login(loginUser);
+		if ((loginResult.isSuccess())) {
+			CartService cartService = new CartService();
+			CartProductService cartProductService = new CartProductService();
+			session.setAttribute("userName", loginResult.getData().getName());
+			if(session.getAttribute("cartId") != null && ParseHelper.isLong(session.getAttribute("cartId").toString())){
+				long cartId = (Long) session.getAttribute("cartId");
+				DataResult<Cart> cartResult = cartService.getById(cartId);
+				if(cartResult.isSuccess()){
+					String customerName = loginResult.getData().getName();
+					DataResult<Cart> cartByCustomerNameResult = cartService.getByCustomerName(customerName);
+					if(cartByCustomerNameResult.isSuccess()){
+						DataResult<List<CartProduct>> cartProductListResult = cartProductService.getByCartId(cartResult.getData().getId());
+						if(cartProductListResult.isSuccess() && cartProductListResult.getData().size() > 0){
+							for(CartProduct cartProduct : cartProductListResult.getData()){
+								cartProduct.setCartId(cartByCustomerNameResult.getData().getId());
+							}
+							Result updateBulkResult = cartProductService.updateBulkCartProduct(cartProductListResult.getData());
+						}
+						session.setAttribute("cartId", cartByCustomerNameResult.getData().getId());
+					}else{
+						cartResult.getData().setCustomerName(customerName);
+						DataResult<Cart> updatedCartResult = cartService.updateCart(cartResult.getData());
+					}
+				}
+			}
+			if(session.getAttribute("backUrl") != null){
+				response.sendRedirect((String)session.getAttribute("backUrl"));
+			}else{
+				response.sendRedirect("MainPage.jsp");
+			}	
+		} 
 	}
-} catch (Exception e) {
-	message = "Service Error";
-	e.printStackTrace();
-}
+
 %>
 <!DOCTYPE html>
 <html>
@@ -66,18 +91,18 @@ try {
 						<div class="card-body p-5 text-center">
 							<div class="mb-md-5 mt-md-4 pb-5">
 								<h2 class="fw-bold mb-2 text-uppercase">Login</h2>
-								<% if(loginStatus == Status.Initialize) {%>
+								<% if(loginResult == null) {%>
 									<p class="text-white-50 mb-5"><%= message %></p>
-								<%}else{%>
-									<p class="text-danger mb-5"><%= message %></p>
-								<%} %>
+								<%}else if(!loginResult.isSuccess()){%>
+									<p class="text-danger mb-5"><%= loginResult.getMessage() %></p>
+								<%}else{ %><%} %>
 								<div class="form-outline form-white mb-4">
-									<input type="text" id="userName" name="userName" value="<%= userName %>"
+									<input type="text"  id="userName" name="userName" value="<%= userName %>"  minlength="3" required
 										class="form-control form-control-lg" /> <label
 										class="form-label" for="userName">User Name</label>
 								</div>
 								<div class="form-outline form-white mb-4">
-									<input type="password" id="password" name="password" value="<%= password %>"
+									<input type="password" id="password" name="password" value="<%= password %>" minlength="5" required
 										class="form-control form-control-lg" /> <label
 										class="form-label" for="password">Password</label>
 								</div>

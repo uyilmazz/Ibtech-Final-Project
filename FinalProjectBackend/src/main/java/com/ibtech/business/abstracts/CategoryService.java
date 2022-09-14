@@ -1,10 +1,10 @@
-package com.ibtech.inventory.business.abstracts;
+package com.ibtech.business.abstracts;
 
 import java.util.List;
 
 import com.ibtech.core.utilities.result.DataResult;
 import com.ibtech.core.utilities.result.Result;
-import com.ibtech.inventory.entities.Category;
+import com.ibtech.entities.Category;
 
 public interface CategoryService {
 	public DataResult<List<Category>> getAll() throws Exception;

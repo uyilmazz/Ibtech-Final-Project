@@ -11,5 +11,5 @@ public interface UserService {
 	public DataResult<User> getByUserName(String name);
 	
 	public DataResult<User> check(User user);
-	public DataResult<Long> add(User user);
+	public DataResult<User> add(User user);
 }

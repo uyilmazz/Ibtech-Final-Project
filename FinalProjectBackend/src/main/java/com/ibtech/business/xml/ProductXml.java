@@ -1,4 +1,4 @@
-package com.ibtech.inventory.business.xml;
+package com.ibtech.business.xml;
 
 import java.util.List;
 
@@ -6,7 +6,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.ibtech.core.utilities.helper.XmlHelper;
-import com.ibtech.inventory.entities.Product;
+import com.ibtech.entities.Product;
 
 public class ProductXml {
 	public static Document format(Product product) throws Exception {

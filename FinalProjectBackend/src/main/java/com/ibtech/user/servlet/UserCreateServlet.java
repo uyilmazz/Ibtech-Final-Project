@@ -12,9 +12,11 @@ import org.w3c.dom.Document;
 
 import com.ibtech.business.abstracts.UserService;
 import com.ibtech.business.concretes.UserManager;
+import com.ibtech.business.contants.message.ErrorResultMessage;
 import com.ibtech.business.xml.UserXml;
 import com.ibtech.core.utilities.helper.XmlHelper;
 import com.ibtech.core.utilities.result.DataResult;
+import com.ibtech.core.utilities.result.Result;
 import com.ibtech.entities.User;
 import com.ibtech.repository.UserRepository;
 
@@ -25,16 +27,22 @@ public class UserCreateServlet extends HttpServlet{
 		try {
 			UserService userService = new UserManager(new UserRepository());
 			Document document = XmlHelper.parse(request.getInputStream());
-			User user = UserXml.parse(document);
-			DataResult<Long> createdResult = userService.add(user);
-			if(createdResult.isSuccess()) {
-				DataResult<User> result = userService.getById(createdResult.getData());
-				Document responseDocument = UserXml.format(result.getData());
-				response.setContentType("application/xml;charset=UTF-8");
-				response.setStatus(201);
-				XmlHelper.dump(responseDocument, response.getOutputStream());
+			Document responseDocument;
+			if(document != null) {
+				User user = UserXml.parse(document);
+				DataResult<User> result = userService.add(user);
+				if(!result.isSuccess()) {
+					responseDocument = XmlHelper.resultDocument(response, result, 400);
+				}else {
+					responseDocument = UserXml.format(result.getData());
+					response.setStatus(200);
+				}
+			}else {
+				Result result = new Result(false,ErrorResultMessage.XMLParseError);
+				responseDocument = XmlHelper.resultDocument(response, result, 400);
 			}
-			response.setStatus(400);
+			response.setContentType("application/xml;charset=UTF-8");
+			XmlHelper.dump(responseDocument, response.getOutputStream());
 		}catch(Exception e) {
 			e.printStackTrace();
 		}

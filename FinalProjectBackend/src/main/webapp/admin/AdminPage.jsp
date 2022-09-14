@@ -2,9 +2,7 @@
 	pageEncoding="UTF-8"%>
 <%@ page import="java.util.List"%>
 <%@ page
-	import="com.ibtech.inventory.business.concretes.CategoryManager,
-	com.ibtech.inventory.repository.CategoryRepository,
-	com.ibtech.inventory.entities.Category,com.ibtech.inventory.entities.Product"%>
+	import="com.ibtech.business.concretes.CategoryManager,com.ibtech.repository.CategoryRepository,com.ibtech.entities.Category,com.ibtech.entities.Product"%>
 <%
 	CategoryManager categoryService = new CategoryManager(new CategoryRepository());
 	List<Category> categories = categoryService.getAll().getData();

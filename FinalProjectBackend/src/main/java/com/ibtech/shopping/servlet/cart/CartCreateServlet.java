@@ -12,9 +12,11 @@ import org.w3c.dom.Document;
 
 import com.ibtech.business.abstracts.CartService;
 import com.ibtech.business.concretes.CartManager;
+import com.ibtech.business.contants.message.ErrorResultMessage;
 import com.ibtech.business.xml.CartXml;
 import com.ibtech.core.utilities.helper.XmlHelper;
 import com.ibtech.core.utilities.result.DataResult;
+import com.ibtech.core.utilities.result.Result;
 import com.ibtech.entities.Cart;
 import com.ibtech.repository.CartRepository;
 
@@ -24,18 +26,26 @@ public class CartCreateServlet extends HttpServlet{
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		try {
-			System.out.println("create cart servlet");
 			CartService cartService = new CartManager(new CartRepository());
 			Document document = XmlHelper.parse(request.getInputStream());
-			Cart cart = CartXml.parse(document);
-			DataResult<Long> result = cartService.create(cart);
-			Cart createdCart = cartService.getById(result.getData()).getData();
-			Document responseDocument = CartXml.format(createdCart);
+			Document responseDocument;
+			if(document != null) {
+				Cart cart = CartXml.parse(document);
+				DataResult<Cart> result = cartService.create(cart);	
+				if(!result.isSuccess()) {
+					responseDocument = XmlHelper.resultDocument(response, result, 400);
+				}else {
+					responseDocument = CartXml.format(result.getData());
+					response.setStatus(200);
+				}
+			}else {
+				Result result = new Result(false,ErrorResultMessage.XMLParseError);
+				responseDocument = XmlHelper.resultDocument(response, result, 400);
+			}
 			response.setContentType("application/xml;charset=UTF-8");
 			XmlHelper.dump(responseDocument, response.getOutputStream());
 		} catch (Exception e) {
 			e.printStackTrace();
 		} 
-		
 	}
 }

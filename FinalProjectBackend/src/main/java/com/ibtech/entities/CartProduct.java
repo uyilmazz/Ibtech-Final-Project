@@ -1,7 +1,5 @@
 package com.ibtech.entities;
 
-import com.ibtech.inventory.entities.Product;
-
 public class CartProduct {
 	private long id;
 	private long cartId;

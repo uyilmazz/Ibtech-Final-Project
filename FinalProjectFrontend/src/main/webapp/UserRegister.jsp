@@ -1,37 +1,30 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-<%!
-	public enum Status { Initialize,Registered,NotRegistered }
-%>
 <%@ page
 	import="com.ibtech.user.service.UserService,
+	com.ibtech.core.utilities.result.*,
 	com.ibtech.user.entities.User"%>
 <%
 String userName = "";
 String password = "";
 String message = "Please enter your username and password!";
-Status.values();
-Status registerStatus = Status.Initialize;
-try {
+DataResult<User> registerResult = null;
+	if(session.getAttribute("userName") != null){
+		response.sendRedirect("MainPage.jsp");
+	}
+
 	if ((request.getParameter("register")) != null) {
 		userName = request.getParameter("userName");
 		password = request.getParameter("password");
 		UserService userService = new UserService();
 		User user = new User(0,userName,password);
-		User registeredUser = userService.register(user);
-		if ((registeredUser != null )) {
-			session.setAttribute("userName", registeredUser.getName());
-			registerStatus = Status.Registered;
-			message = "You have successfully registered.";
-		} else {
-			registerStatus = Status.NotRegistered;
-			message = "Failed to register!";
-		}
+		registerResult = userService.register(user);
+		if (registerResult.isSuccess()) {
+			session.setAttribute("userName", registerResult.getData().getName());
+			response.sendRedirect("MainPage.jsp");
+		} 
 	}
-} catch (Exception e) {
-	message = "Service Error";
-	e.printStackTrace();
-}
+
 %>
 <!DOCTYPE html>
 <html>
@@ -67,20 +60,18 @@ try {
 						<div class="card-body p-5 text-center">
 							<div class="mb-md-5 mt-md-4 pb-5">
 								<h2 class="fw-bold mb-2 text-uppercase">Register</h2>
-								<% if(registerStatus == Status.Initialize) {%>
+								<% if(registerResult == null) {%>
 									<p class="text-white-50 mb-5"><%= message %></p>
-								<%}else if(registerStatus == Status.Registered){ %>
-									<p class="text-success mb-5"><%= message %></p>
-								<%}else{%>
-									<p class="text-danger mb-5"><%= message %></p>
-								<%} %>
+								<%}else if(!registerResult.isSuccess()){ %>
+									<p class="text-danger mb-5"><%= registerResult.getMessage() %></p>
+								<%}else{%><%} %>
 								<div class="form-outline form-white mb-4">
-									<input type="text" id="userName" name="userName" value="<%= userName %>"
+									<input type="text" id="userName" name="userName" value="<%= userName %>" minlength="3" required
 										class="form-control form-control-lg" /> <label
 										class="form-label" for="userName">User Name</label>
 								</div>
 								<div class="form-outline form-white mb-4">
-									<input type="password" id="password" name="password" value="<%= password %>"
+									<input type="password" id="password" name="password" value="<%= password %>" minlength="5" required
 										class="form-control form-control-lg" /> <label
 										class="form-label" for="password">Password</label>
 								</div>

@@ -1,15 +1,24 @@
-package com.ibtech.inventory.repository;
+package com.ibtech.repository;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import com.ibtech.inventory.entities.Category;
-import com.ibtech.inventory.entities.Product;
-import com.ibtech.repository.BaseRepository;
+import com.ibtech.entities.Category;
+import com.ibtech.entities.Product;
 
 public class ProductRepository extends BaseRepository<Product>{
+	
+	public List<Product> getAll() throws SQLException{
+		String sql = "select p.id as id,p.\"name\" ,p.sales_price ,p.image_path,p.category_id ,c.\"name\" as category_name from products p join categories c on p.category_id = c.id ";
+		return super.listAll(sql);
+	}
+	
+	public Product getById(long productId) throws SQLException {
+		String sql = "select p.id as id,p.\"name\" ,p.sales_price ,p.image_path,p.category_id ,c.\"name\" as category_name from products p join categories c on p.category_id = c.id  where p.id = ?";
+		return super.find(sql, productId);
+	}
 	
 	public List<Product> getByCategory(int category_id) throws SQLException{
 		connect();
@@ -20,6 +29,22 @@ public class ProductRepository extends BaseRepository<Product>{
 		disconnect();
 		List<Product> productList = parseList(resultSet);
 		return productList;
+	}
+	
+	public List<Product> getByLimit(int limit) throws SQLException{
+		connect();
+		String sql = "select p.id as id,p.\"name\" ,p.sales_price ,p.image_path,p.category_id ,c.\"name\" as category_name from products p join categories c on p.category_id = c.id  order by p.id desc limit ?";
+		PreparedStatement statement = connection.prepareStatement(sql);
+		statement.setInt(1, limit);
+		ResultSet resultSet = statement.executeQuery();
+		disconnect();
+		List<Product> productList = parseList(resultSet);
+		return productList;
+	}
+	
+	public Product findByName(String name) throws SQLException {
+		String sql = "select p.id as id,p.\"name\" ,p.sales_price ,p.image_path,p.category_id ,c.\"name\" as category_name from products p join categories c on p.category_id = c.id  where p.name = ?";
+		return super.findByName(sql, name);
 	}
 
 	public boolean add(Product product) throws SQLException {

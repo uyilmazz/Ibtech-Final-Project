@@ -4,14 +4,17 @@
 <%@ page
 	import="com.ibtech.business.concretes.CartManager,
 	com.ibtech.repository.CartRepository,
+	com.ibtech.core.utilities.result.DataResult,
 	com.ibtech.entities.Cart"%>
 <%
-CartManager cartService = new CartManager(new CartRepository());
-	List<Cart> carts = cartService.getAll().getData();
-	if(carts == null){
-		carts = new ArrayList<>();
+	List<Cart> carts = new ArrayList<>();
+	CartManager cartService = new CartManager(new CartRepository());
+	DataResult<List<Cart>> result = cartService.getAll();
+	if(result.isSuccess()){
+		carts = result.getData();
 	}
 %>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -31,6 +34,9 @@ CartManager cartService = new CartManager(new CartRepository());
 		<div class="row mt-2">
 			<jsp:include page="../partials/SideBar.jsp" />
 			<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+			<%if(!result.isSuccess()) {%>
+				<h1 class="text-center text-danger mt-3"><%= result.getMessage() %></h1>
+			<%} else{%>
 				<div class="card">
 					<div class="card-header text-center bg-dark bg-gradient text-light">
 						<h3>Cart Management</h3>
@@ -64,6 +70,7 @@ CartManager cartService = new CartManager(new CartRepository());
 						</table>
 					</div>
 				</div>
+			<%} %>
 			</main>
 		</div>
 	</div>
