@@ -5,32 +5,64 @@
 	com.ibtech.shopping.service.CartProductService,
 	com.ibtech.shopping.entities.CartProduct,
 	com.ibtech.shopping.entities.Cart,
+	com.ibtech.core.utilities.helper.ParseHelper,
+	com.ibtech.core.utilities.result.DataResult,
+	java.util.ArrayList,
 	java.util.List,
 	com.ibtech.shopping.entities.Cart"%>
 <%
-long id = 1;
-session.setAttribute("cartId", id);
-String message = "";
 Cart cart = null;
-List<CartProduct> cartProductList = null;
+DataResult<Cart> cartResult = null;
+List<CartProduct> cartProductList = new ArrayList<>();
+DataResult<List<CartProduct>> cartProductResult = null;
 CartService cartService = new CartService();
 CartProductService cartProductService = new CartProductService();
-if (session.getAttribute("cartId") != null) {
-	long cartId = (long) session.getAttribute("cartId");
-	cart = cartService.getById(cartId);
-	if(cart != null){
-		cartProductList = cartProductService.getByCartId(cartId);
-		message = cartProductList.size() > 0 ? "" : "You haven't added any products to the cart yet.";
+if(session.getAttribute("userName") != null){
+	String customerName = (String)session.getAttribute("userName");
+	DataResult<Cart> cartByCustomerNameResult = cartService.getByCustomerName(customerName);
+	if(cartByCustomerNameResult.isSuccess()){
+		session.setAttribute("cartId", cartByCustomerNameResult.getData().getId());
+		cartResult = cartByCustomerNameResult;
+		cart = cartByCustomerNameResult.getData();
+		cartProductResult = cartProductService.getByCartId(cart.getId());
+		if(cartProductResult.isSuccess()){
+			cartProductList = cartProductResult.getData();
+		}
 	}else{
-		message = cart != null ? "" : "You haven't added any products to the cart yet.";
+		Cart newCart = new Cart(0,customerName,0);
+		DataResult<Cart> createdResult = cartService.createCart(newCart);
+		if(createdResult.isSuccess()){
+			session.setAttribute("cartId", createdResult.getData().getId());
+			response.sendRedirect("CartView.jsp");
+		}else{
+			response.sendRedirect("MainPage.jsp");
+		}
 	}
 }else{
-	Cart newCart = new Cart(0,"new user",0);
-	Cart addedCart = cartService.createCart(newCart);
-	session.setAttribute("cartId", addedCart.getId());
-	response.sendRedirect("CartView.jsp");
+	if (session.getAttribute("cartId") != null && ParseHelper.isLong(session.getAttribute("cartId").toString())) {
+		long cartId = (long) session.getAttribute("cartId");
+		cartResult = cartService.getById(cartId);
+		if(cartResult.isSuccess()){
+			cart = cartResult.getData();
+			cartProductResult = cartProductService.getByCartId(cart.getId());
+			if(cartProductResult.isSuccess()){
+				cartProductList = cartProductResult.getData();
+			}
+		}else{
+			session.removeAttribute("cartId");
+			response.sendRedirect("CartView.jsp");
+		}
+	}else{
+		Cart newCart = new Cart(0,"",0);
+		DataResult<Cart> createdResult = cartService.createCart(newCart);
+		if(createdResult.isSuccess()){
+			session.setAttribute("cartId", createdResult.getData().getId());
+			response.sendRedirect("CartView.jsp");
+		}else{
+			response.sendRedirect("MainPage.jsp");
+		}
+	}
 }
-
 %>
 <!DOCTYPE html>
 <html>
@@ -47,18 +79,19 @@ if (session.getAttribute("cartId") != null) {
 <body>
 	<div class="container mt-3">
 		<jsp:include page="partials/Navbar.jsp" />
-		<section class="h-100 h-custom" style="background-color: #eee;">
+		<%if(cartResult == null) {%>
+		<%}else if(cartResult.isSuccess()) {%>
+			<section class="h-100 h-custom" style="background-color: #eee;">
 			<div class="py-5 h-100">
 				<div
 					class="row d-flex justify-content-center align-items-center h-100">
 					<div class="col">
 						<div class="card">
 							<div class="card-body p-4">
-								<% if(cartProductList.size() > 0) { %>
 									<div class="row">
 									<div class="col-lg-8">
 										<h5 class="mb-3">
-											<a href="#!" class="text-body"><i
+											<a href="MainPage.jsp" class="text-body"><i
 												class="fas fa-long-arrow-alt-left me-2"></i>Continue
 												shopping</a>
 										</h5>
@@ -70,7 +103,6 @@ if (session.getAttribute("cartId") != null) {
 												<p class="mb-0">You have <%= cartProductList.size() %> items in your cart</p>
 											</div>
 										</div>
-
 									<% for(int i = 0; i < cartProductList.size() ; i++) {%>
 										<div class="card mb-3">
 											<div class="card-body">
@@ -89,8 +121,13 @@ if (session.getAttribute("cartId") != null) {
 														</div>
 													</div>												
 													<div class="d-flex flex-row align-items-center">
-														<div style="width: 80px;">
+														<div style="width: 100px;">
 															<h5 class="mb-0"><%= cartProductList.get(i).getSalesPrice() %> TL</h5>
+														</div>
+													</div>
+													<div class="d-flex flex-row align-items-center">
+														<div style="width: 110px;">
+															<h5 class="mb-0">Tax: <%= cartProductList.get(i).getTaxRate() %>%</h5>
 														</div>
 													</div>
 													<div class="d-flex flex-row align-items-center">
@@ -100,15 +137,13 @@ if (session.getAttribute("cartId") != null) {
 														<div style="width: 120px;">
 															<h5 class="mb-0"><%= cartProductList.get(i).getLineAmount() %> TL</h5>
 														</div>
-														<a href="#!" style="color: #cecece;"><i
+														<a href="CartProductRemove.jsp?cartProductId=<%= cartProductList.get(i).getId() %>" style="color: #cecece;"><i
 															class="fas fa-trash-alt text-danger"></i></a>
 													</div>
 												</div>
 											</div>
 										</div>
-									
 									<%}%>
-	
 									</div>
 									<div class="col-lg-4">
 										<div class="card bg-primary text-white rounded-3">
@@ -116,10 +151,6 @@ if (session.getAttribute("cartId") != null) {
 												<div
 													class="d-flex justify-content-between align-items-center mb-4">
 													<h5 class="mb-0">Card details</h5>
-													<img
-														src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/avatar-6.webp"
-														class="img-fluid rounded-3" style="width: 45px;"
-														alt="Avatar">
 												</div>
 												<hr class="my-4">
 												<div class="d-flex justify-content-between">
@@ -135,25 +166,28 @@ if (session.getAttribute("cartId") != null) {
 													<p class="mb-2"><%= cart.getTotalAmount() %> TL</p>
 												</div>
 
-												<button type="button" class="btn btn-info btn-block btn-lg">
+												<a type="button"  href="./Checkout.jsp?cartId=<%=cart.getId()%>"
+												class="btn btn-info btn-block btn-lg">
 													<div class="d-flex justify-content-between">
 														<span>Checkout <i
 															class="fas fa-long-arrow-alt-right ms-2"></i></span>
 													</div>
-												</button>
+												</a>
 											</div>
 										</div>
 									</div>
-								</div>
-								<%}else{%>
-									<h1 class="text-center"><%= message %></h1>
-								<%} %>						
+								</div>					
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 		</section>
+		<%}else{%>
+			<div class="d-flex justify-content-sm-center align-items-center" style="height: 60vh;">
+			    <h3 class="text-danger"><%=cartResult.getMessage() != null ?  cartResult.getMessage() : ""%></h3>
+			</div>
+		<%} %>
 	</div>
 
 	<script src="https://kit.fontawesome.com/dee818d880.js"

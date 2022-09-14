@@ -1,4 +1,4 @@
-package com.ibtech.inventory.business.constants.message;
+package com.ibtech.business.contants.message;
 
 public class InventoryResultMessage {
 	

@@ -4,10 +4,26 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 import com.ibtech.entities.Cart;
 
 public class CartRepository  extends BaseRepository<Cart>{
+	
+	public List<Cart> getAll() throws SQLException{
+		String sql = "Select * from carts";
+		return super.listAll(sql);
+	}
+	
+	public Cart getById(Long cartId) throws SQLException {
+		String sql = "Select * from carts where id = ?";;
+		return super.find(sql, cartId);
+	}
+	
+	public Cart findByUserName(String userName) throws SQLException {
+		String sql = "Select * from carts where  customer_name = ?";
+		return super.findByName(sql, userName);
+	}
 	
 	public long add(Cart cart) throws SQLException {
 		long cartId = 0;

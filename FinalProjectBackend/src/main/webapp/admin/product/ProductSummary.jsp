@@ -1,13 +1,17 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-<%@ page import="java.util.List"%>
+<%@ page import="java.util.List,
+java.util.ArrayList"%>
 <%@ page
-	import="com.ibtech.inventory.business.concretes.ProductManager,
-	com.ibtech.inventory.repository.ProductRepository,
-	com.ibtech.inventory.entities.Category,com.ibtech.inventory.entities.Product"%>
+	import="com.ibtech.business.concretes.ProductManager,com.ibtech.repository.ProductRepository,com.ibtech.entities.Category,com.ibtech.entities.Product,
+	com.ibtech.core.utilities.result.DataResult"%>
 <%
-ProductManager productService = new ProductManager(new ProductRepository());
-List<Product> products = productService.getAll().getData();
+	List<Product> products = new ArrayList<>();
+	ProductManager productService = new ProductManager(new ProductRepository());
+	DataResult<List<Product>> result = productService.getAll();
+	if(result.isSuccess()){
+		products = result.getData();
+	}
 %>
 <!DOCTYPE html>
 <html>
@@ -28,6 +32,9 @@ List<Product> products = productService.getAll().getData();
 		<div class="row mt-2">
 			<jsp:include page="../partials/SideBar.jsp" />
 			<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+			<%if(!result.isSuccess()) {%>
+				<h1 class="text-center text-danger mt-3"><%= result.getMessage() %></h1>
+			<%} else{%>
 				<div class="card">
 					<div class="card-header text-center bg-dark bg-gradient text-light">
 						<h3>Product Management</h3><%=products.size()%> products listed.
@@ -65,6 +72,7 @@ List<Product> products = productService.getAll().getData();
 						</table>
 					</div>
 				</div>
+			<%} %>	
 			</main>
 		</div>
 	</div>

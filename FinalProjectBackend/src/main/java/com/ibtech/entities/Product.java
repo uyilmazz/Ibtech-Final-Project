@@ -1,4 +1,4 @@
-package com.ibtech.inventory.entities;
+package com.ibtech.entities;
 
 public class Product {
 	private long productId;

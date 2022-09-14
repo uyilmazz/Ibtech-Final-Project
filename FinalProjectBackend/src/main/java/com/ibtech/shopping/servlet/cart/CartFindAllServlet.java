@@ -25,8 +25,14 @@ public class CartFindAllServlet extends HttpServlet{
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		try {
 			CartService cartService = new CartManager(new CartRepository());
-			DataResult<List<Cart>> cartList = cartService.getAll();
-			Document document = CartXml.formatAll(cartList.getData());
+			DataResult<List<Cart>> result = cartService.getAll();
+			Document document;
+			if(result.isSuccess()) {
+				document = CartXml.formatAll(result.getData());
+				response.setStatus(200);
+			}else {
+				document = XmlHelper.resultDocument(response, result, 400);
+			}
 			response.setContentType("application/xml;charset=UTF-8");
 			XmlHelper.dump(document, response.getOutputStream());
 		}catch(Exception e) {
@@ -34,3 +40,4 @@ public class CartFindAllServlet extends HttpServlet{
 		}
 	}
 }
+

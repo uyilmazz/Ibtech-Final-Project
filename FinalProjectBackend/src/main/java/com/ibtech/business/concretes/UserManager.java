@@ -4,9 +4,7 @@ import java.util.List;
 
 import com.ibtech.business.abstracts.UserService;
 import com.ibtech.business.contants.message.UserResultMessage;
-import com.ibtech.core.utilities.result.DataResult;
-import com.ibtech.core.utilities.result.ErrorDataResult;
-import com.ibtech.core.utilities.result.SuccessDataResult;
+import com.ibtech.core.utilities.result.*;
 import com.ibtech.entities.User;
 import com.ibtech.repository.UserRepository;
 
@@ -55,23 +53,30 @@ public class UserManager implements UserService{
 	}
 
 	@Override
-	public DataResult<Long> add(User user) {
+	public DataResult<User> add(User user) {
 		try {
 			User dbUser = getByUserName(user.getName()).getData();
 			if(dbUser != null) {
-				return new ErrorDataResult<Long>(UserResultMessage.UserAlreadyExist);
+				return new ErrorDataResult<User>(UserResultMessage.UserAlreadyExist);
 			}
 			Long id = userRepository.add(user);
-			return id > 0 ? new SuccessDataResult<Long>(id) : new ErrorDataResult<Long>(UserResultMessage.UserNotRegistered);
+			if(id < 0) {
+				return new ErrorDataResult<User>(UserResultMessage.UserNotRegistered);
+			}
+			return getById(id);
 		}catch(Exception e) {
 			e.printStackTrace();
-			return new ErrorDataResult<Long>(UserResultMessage.ErrorMessage);
+			return new ErrorDataResult<User>(UserResultMessage.ErrorMessage);
 		}
 	}
 
 	@Override
 	public DataResult<User> check(User user) {
 		try {
+			Result validateResult = validateUser(user);
+			if(!validateResult.isSuccess()) {
+				return new ErrorDataResult<User>(validateResult.getMessage());
+			}
 			User dbUser = userRepository.check(user);
 			return dbUser != null ? new SuccessDataResult<User>(dbUser) : new ErrorDataResult<User>(UserResultMessage.LoginFailed);
 		}catch(Exception e){
@@ -80,4 +85,10 @@ public class UserManager implements UserService{
 		}
 	}
 
+	private Result validateUser(User user) {
+		if(user.getName().length() < 3) return new ErrorResult(UserResultMessage.UserNameValidateError);
+		if(user.getPassword().length() < 5) return new ErrorResult(UserResultMessage.PasswordValidateError);
+		return new SuccessResult();
+	}
+	
 }

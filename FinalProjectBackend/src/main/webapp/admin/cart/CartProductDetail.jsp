@@ -3,25 +3,25 @@
 
 <%@ page
 	import="com.ibtech.repository.CartProductRepository,
-	com.ibtech.business.abstracts.CartProductService,
 	com.ibtech.business.concretes.CartProductManager,
-	com.ibtech.entities.CartProduct
-	"
+	com.ibtech.entities.CartProduct,
+	com.ibtech.core.utilities.result.DataResult,
+	com.ibtech.core.utilities.helper.ParseHelper"
 %>
 <%
-	String message ="";
-	if(request.getParameter("cartProductId") == null){
+	CartProduct cartProduct = null;
+	DataResult<CartProduct> result = null;
+	if(request.getParameter("cartProductId") != null && ParseHelper.isLong(request.getParameter("cartProductId"))){
+		int cartProductId = Integer.parseInt(request.getParameter("cartProductId"));
+		CartProductManager cartProductManager = new CartProductManager(new CartProductRepository());
+		result = cartProductManager.getById(cartProductId);
+		if(result.isSuccess()){
+			cartProduct = result.getData();
+		}
+	}else{
 		response.sendRedirect("CartSummary.jsp");
 	}
-	long cartProductId = Long.parseLong(request.getParameter("cartProductId"));
-	CartProductService cartProductService = new CartProductManager(new CartProductRepository());
-	CartProduct cartProduct = cartProductService.getById(cartProductId).getData();
-	if(cartProduct == null){
-		message = "CartProduct Not Found!";
-	}
 %>  
-
-   
 
 <!DOCTYPE html>
 <html>
@@ -40,8 +40,13 @@
 	<div class="row mt-2">
       <jsp:include page="../partials/SideBar.jsp" />
 		 <main class="col-md-7 ms-sm-auto col-lg-10 px-md-4" >
-		
-			<% if(cartProduct != null) {%>
+			<%if (result == null) {%>
+			<%} else if (!result.isSuccess()) {%>
+			<div class="text-center mt-3">
+				<h1 class="text-center text-danger"><%=result.getMessage()%></h1>
+				<img src="../../images/data_not_found.jpg">
+			</div>
+			<%} else {%>
 				<div class="container">
 				<div class="row mt-3">
 					<div class="col-4 lg-5 sm-1">
@@ -82,10 +87,8 @@
 					</div>
    				</div>
 				</div>
+			<%} %>
 				
-				<%}else{%>
-					<h1 class="text-center"><%= message %></h1>
-				<%} %>	
 		   </main>
 	</div>
 

@@ -1,18 +1,18 @@
-package com.ibtech.inventory.business.concretes;
+package com.ibtech.business.concretes;
 
 import java.sql.SQLException;
 import java.util.List;
 
+import com.ibtech.business.abstracts.ProductService;
+import com.ibtech.business.contants.message.InventoryResultMessage;
 import com.ibtech.core.utilities.result.DataResult;
 import com.ibtech.core.utilities.result.ErrorDataResult;
 import com.ibtech.core.utilities.result.ErrorResult;
 import com.ibtech.core.utilities.result.Result;
 import com.ibtech.core.utilities.result.SuccessDataResult;
 import com.ibtech.core.utilities.result.SuccessResult;
-import com.ibtech.inventory.business.abstracts.ProductService;
-import com.ibtech.inventory.business.constants.message.InventoryResultMessage;
-import com.ibtech.inventory.entities.Product;
-import com.ibtech.inventory.repository.ProductRepository;
+import com.ibtech.entities.Product;
+import com.ibtech.repository.ProductRepository;
 
 public class ProductManager implements ProductService{
 
@@ -24,9 +24,8 @@ public class ProductManager implements ProductService{
 	
 	@Override
 	public DataResult<List<Product>> getAll() {
-		String sql = "select p.id as id,p.\"name\" ,p.sales_price ,p.image_path,p.category_id ,c.\"name\" as category_name from products p join categories c on p.category_id = c.id ";
 		try {
-			return new SuccessDataResult<List<Product>>(productRepository.listAll(sql));
+			return new SuccessDataResult<List<Product>>(productRepository.getAll());
 		} catch (SQLException e) {
 			return new ErrorDataResult<List<Product>>(InventoryResultMessage.ErrorMessage);
 		}
@@ -41,10 +40,18 @@ public class ProductManager implements ProductService{
 	}
 	
 	@Override
-	public DataResult<Product> getById(long productId) {
-		String sql = "select p.id as id,p.\"name\" ,p.sales_price ,p.image_path,p.category_id ,c.\"name\" as category_name from products p join categories c on p.category_id = c.id  where p.id = ?";
+	public DataResult<List<Product>> getByLimit(int limit) {
 		try {
-			Product product = productRepository.find(sql, productId);
+			return new SuccessDataResult<List<Product>>(productRepository.getByLimit(limit));
+		}catch(Exception e) {
+			return new ErrorDataResult<List<Product>>(InventoryResultMessage.ErrorMessage);
+		}
+	}
+	
+	@Override
+	public DataResult<Product> getById(long productId) {
+		try {
+			Product product = productRepository.getById(productId);
 			if(product != null) {
 				return new SuccessDataResult<Product>(product);
 			}else {
@@ -57,9 +64,8 @@ public class ProductManager implements ProductService{
 
 	@Override
 	public Result add(Product product) {
-		try {
-			String sql = "select p.id as id,p.\"name\" ,p.sales_price ,p.image_path,p.category_id ,c.\"name\" as category_name from products p join categories c on p.category_id = c.id  where p.name = ?";
-			Product dbProduct = productRepository.findByName(sql, product.getProductName());
+		try {	
+			Product dbProduct = productRepository.findByName(product.getProductName());
 			if(dbProduct != null) {
 				return new ErrorResult(InventoryResultMessage.ProductAlreadyExist);
 			}
@@ -77,8 +83,7 @@ public class ProductManager implements ProductService{
 			if(!result.isSuccess()) {
 				return result;
 			}
-			String sql = "select p.id as id,p.\"name\" ,p.sales_price ,p.image_path,p.category_id ,c.\"name\" as category_name from products p join categories c on p.category_id = c.id  where p.name = ?";
-			Product dbProduct = productRepository.findByName(sql, product.getProductName());
+			Product dbProduct = productRepository.findByName(product.getProductName());
 			if(dbProduct != null) {
 				return new ErrorResult(InventoryResultMessage.ProductAlreadyExist);
 			}
@@ -103,5 +108,7 @@ public class ProductManager implements ProductService{
 			return new ErrorResult(InventoryResultMessage.ErrorMessage);
 		}
 	}
+
+	
 
 }

@@ -3,32 +3,38 @@
 <%@ page
 	import="com.ibtech.business.concretes.CartManager,
 	com.ibtech.business.concretes.CartProductManager,
+	java.util.ArrayList,
+	com.ibtech.core.utilities.result.DataResult,
+	com.ibtech.core.utilities.helper.ParseHelper,
 	com.ibtech.repository.CartRepository,
 	com.ibtech.repository.CartProductRepository,
 	java.util.List,
 	com.ibtech.entities.Cart,
 	com.ibtech.entities.CartProduct"%>
 <%
-	CartManager cartService = new CartManager(new CartRepository());
-	CartProductManager cartProductService = new CartProductManager(new CartProductRepository());
-	String message = "";
 	Cart cart = null;
-	
-	List<CartProduct> cartProductList = null;
-	if(request.getParameter("cartId") == null){
-		response.sendRedirect("CartSummary.jsp");
-	}
-	
-	long cartId = Long.parseLong(request.getParameter("cartId"));
-	cart = cartService.getById(cartId).getData();
-	if(cart != null){
-		cartProductList = cartProductService.getByCartId(cartId).getData();
-		message = cartProductList.size() > 0 ? "" : "No products have been added to the cart yet.";
+	String message = "";
+	DataResult<Cart> cartResult = null;
+	DataResult<List<CartProduct>> cartProductResult = null;
+	List<CartProduct> cartProductList = new ArrayList<>();
+	if (request.getParameter("cartId") != null && ParseHelper.isLong(request.getParameter("cartId"))) {
+		CartManager cartService = new CartManager(new CartRepository());
+		long cartId = Long.parseLong(request.getParameter("cartId"));
+		cartResult = cartService.getById(cartId);
+		if(cartResult.isSuccess()){
+			cart = cartResult.getData();
+			CartProductManager cartProductService = new CartProductManager(new CartProductRepository());
+			cartProductResult = cartProductService.getByCartId(cartId);
+			if(cartProductResult.isSuccess()){
+				cartProductList = cartProductResult.getData();
+				message = cartProductList.size() > 0 ? "" : "No products have been added to the cart yet.";
+			}
+		}
 	}else{
 		response.sendRedirect("CartSummary.jsp");
 	}
-%>  
- 
+%> 
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -47,12 +53,24 @@
     <div class="row mt-2">
       <jsp:include page="../partials/SideBar.jsp" />
     	 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4" >
-		  
-		  <div class="content mx-auto h-100" >
+		  <%if (cartResult == null) {%>
+			<%} else if (!cartResult.isSuccess()) {%>
+			<div class="text-center mt-3">
+				<h1 class="text-center text-danger"><%=cartResult.getMessage()%></h1>
+				<img src="../../images/data_not_found.jpg">
+			</div>
+			<%} else {%>
+				<%if (cartProductResult == null) {%>
+				<%} else if (!cartProductResult.isSuccess()) {%>
+					<div class="text-center mt-3">
+						<h1 class="text-center text-danger"><%=cartProductResult.getMessage()%></h1>
+						<img src="../../images/data_not_found.jpg">
+					</div>
+				<%} else {%>
+					<div class="content mx-auto h-100" >
     		<section class="h-100 h-custom">
 				<div class="py-5 h-100">
-				<div
-					class="row d-flex justify-content-center align-items-center h-100">
+				<div class="row d-flex justify-content-center align-items-center h-100">
 					<div class="col">
 					<h3>Cart Detail</h3>
 						<div class="card">
@@ -78,7 +96,7 @@
 														</div>
 													</div>												
 													<div class="d-flex flex-row align-items-center">
-														<div style="width: 80px;">
+														<div style="width: 100px;">
 															<h5 class="mb-0"><%= cartProductList.get(i).getSalesPrice() %> TL</h5>
 														</div>
 													</div>
@@ -134,6 +152,10 @@
 			</div>
 		</section>
 	</div>
+				
+				<%} %>
+			<%} %>
+		  
 	</main>
     </div>
   
