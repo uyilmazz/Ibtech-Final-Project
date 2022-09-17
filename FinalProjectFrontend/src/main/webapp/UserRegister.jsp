@@ -2,7 +2,12 @@
 	pageEncoding="UTF-8"%>
 <%@ page
 	import="com.ibtech.user.service.UserService,
+	com.ibtech.shopping.service.CartService,
+	com.ibtech.shopping.service.CartProductService,
 	com.ibtech.core.utilities.result.*,
+	java.util.List,
+	com.ibtech.shopping.entities.*,
+	com.ibtech.core.utilities.helper.ParseHelper,
 	com.ibtech.user.entities.User"%>
 <%
 String userName = "";
@@ -20,8 +25,39 @@ DataResult<User> registerResult = null;
 		User user = new User(0,userName,password);
 		registerResult = userService.register(user);
 		if (registerResult.isSuccess()) {
+			CartService cartService = new CartService();
+			CartProductService cartProductService = new CartProductService();
 			session.setAttribute("userName", registerResult.getData().getName());
-			response.sendRedirect("MainPage.jsp");
+			if(session.getAttribute("cartId") != null && ParseHelper.isLong(session.getAttribute("cartId").toString())){
+				long cartId = (Long) session.getAttribute("cartId");
+				DataResult<Cart> cartResult = cartService.getById(cartId);
+				if(cartResult.isSuccess()){
+					String customerName = registerResult.getData().getName();
+					Cart newCart = new Cart(0,customerName,0);
+					DataResult<Cart> cartByCustomerNameResult = cartService.createCart(newCart);
+					if(cartByCustomerNameResult.isSuccess()){
+						DataResult<List<CartProduct>> cartProductListResult = cartProductService.getByCartId(cartResult.getData().getId());
+						if(cartProductListResult.isSuccess() && cartProductListResult.getData().size() > 0){
+							for(CartProduct cartProduct : cartProductListResult.getData()){
+								cartProduct.setCartId(cartByCustomerNameResult.getData().getId());
+							}
+							Result updateBulkResult = cartProductService.updateBulkCartProduct(cartProductListResult.getData());
+							if(updateBulkResult.isSuccess()){
+								cartService.deleteCart(cartId);
+							}
+						}
+						session.setAttribute("cartId", cartByCustomerNameResult.getData().getId());
+					}else{
+						cartResult.getData().setCustomerName(customerName);
+						DataResult<Cart> updatedCartResult = cartService.updateCart(cartResult.getData());
+					}
+				}
+			}
+			if(session.getAttribute("backUrl") != null){
+				response.sendRedirect((String)session.getAttribute("backUrl"));
+			}else{
+				response.sendRedirect("MainPage.jsp");
+			}
 		} 
 	}
 

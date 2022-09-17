@@ -40,6 +40,9 @@ DataResult<User> loginResult = null;
 								cartProduct.setCartId(cartByCustomerNameResult.getData().getId());
 							}
 							Result updateBulkResult = cartProductService.updateBulkCartProduct(cartProductListResult.getData());
+							if(updateBulkResult.isSuccess()){
+								cartService.deleteCart(cartId);
+							}
 						}
 						session.setAttribute("cartId", cartByCustomerNameResult.getData().getId());
 					}else{

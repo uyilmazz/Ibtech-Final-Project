@@ -30,10 +30,6 @@ public class CartProductUpdateBulkServlet extends HttpServlet{
 			Document responseDocument;
 			if(document != null) {
 				List<CartProduct> cartProducts = CartProductXml.parseList(document);
-				for(CartProduct cartProduct : cartProducts) {
-					System.out.println(cartProduct.getCartId());
-					System.out.println(cartProduct.getSalesPrice());
-				}
 				Result createdResult = cartProductManager.updateBulk(cartProducts);
 				if(!createdResult.isSuccess()) {
 					responseDocument = XmlHelper.resultDocument(response, createdResult, 400);

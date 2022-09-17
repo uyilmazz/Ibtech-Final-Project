@@ -7,25 +7,38 @@ import java.util.List;
 
 import com.ibtech.entities.Category;
 
-public class CategoryRepository extends BaseRepository<Category>{
+public class CategoryRepository extends BaseRepository<Category> {
 
-	public List<Category> getAll() throws SQLException{
+	public List<Category> getAll() throws SQLException {
 		String sql = "Select * from categories";
 		return super.listAll(sql);
 	}
 	
+	public Integer getCount() throws SQLException {
+		int count = 0;
+		connect();
+		String sql = "Select count(*) from categories";
+		PreparedStatement statement = connection.prepareStatement(sql);
+		ResultSet resultSet = statement.executeQuery();
+		if(resultSet.next()) {
+			count = resultSet.getInt("count");
+		}
+		disconnect();
+		return count;
+	}
+
 	public Category getById(int categoryId) throws SQLException {
 		String sql = "Select * from categories where id = ?";
 		return super.find(sql, categoryId);
 	}
-	
+
 	public Category findByName(String name) throws SQLException {
 		String sql = "Select * from categories where name = ?";
 		return super.findByName(sql, name);
 	}
-	
+
 	public boolean add(Category category) throws SQLException {
-		connect();		
+		connect();
 		String sql = "insert into categories(name) values(?)";
 		PreparedStatement statement = connection.prepareStatement(sql);
 		statement.setString(1, category.getCategoryName());
@@ -33,9 +46,9 @@ public class CategoryRepository extends BaseRepository<Category>{
 		disconnect();
 		return affected > 0 ? true : false;
 	}
-	
+
 	public boolean update(Category category) throws SQLException {
-		connect();	
+		connect();
 		String sql = "Update Categories set name=? where id=?";
 		PreparedStatement statement = connection.prepareStatement(sql);
 		statement.setString(1, category.getCategoryName());
@@ -44,7 +57,7 @@ public class CategoryRepository extends BaseRepository<Category>{
 		disconnect();
 		return affected > 0 ? true : false;
 	}
-	
+
 	public boolean delete(int id) throws SQLException {
 		connect();
 		String sql = "Delete from categories where id =?";
@@ -54,12 +67,12 @@ public class CategoryRepository extends BaseRepository<Category>{
 		disconnect();
 		return affected > 0 ? true : false;
 	}
-	
+
 	@Override
-	protected Category parse(ResultSet resultSet) throws SQLException {	
+	protected Category parse(ResultSet resultSet) throws SQLException {
 		int categoryId = resultSet.getInt("id");
 		String categoryName = resultSet.getString("name");
-		Category category = new Category(categoryId,categoryName);
+		Category category = new Category(categoryId, categoryName);
 		return category;
 	}
 }

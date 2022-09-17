@@ -96,5 +96,15 @@ public class CategoryManager implements CategoryService{
 			return new ErrorResult(InventoryResultMessage.ErrorMessage);
 		}
 	}
+
+	@Override
+	public DataResult<Integer> getCount() {
+		try {
+			return new SuccessDataResult<Integer>(categoryRepository.getCount());
+		}catch(Exception e) {
+			e.printStackTrace();
+			return new ErrorDataResult<Integer>();
+		}
+	}
 	
 }

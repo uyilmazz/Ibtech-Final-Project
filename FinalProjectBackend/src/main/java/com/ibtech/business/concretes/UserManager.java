@@ -91,4 +91,13 @@ public class UserManager implements UserService{
 		return new SuccessResult();
 	}
 	
+	@Override
+	public DataResult<Integer> getCount() {
+		try {
+			return new SuccessDataResult<Integer>(userRepository.getCount());
+		}catch(Exception e) {
+			e.printStackTrace();
+			return new ErrorDataResult<Integer>();
+		}
+	}
 }

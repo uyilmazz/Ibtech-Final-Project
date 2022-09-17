@@ -17,7 +17,7 @@
 		session.setAttribute("backUrl", "./CartView.jsp");
 		response.sendRedirect("./UserLogin.jsp");
 	}else{
-		response.sendRedirect("MainPage.jsp");
+		response.sendRedirect("CheckoutAddress.jsp");
 	}
 %>    
 

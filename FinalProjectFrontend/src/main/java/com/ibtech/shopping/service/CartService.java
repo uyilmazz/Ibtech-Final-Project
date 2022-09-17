@@ -91,4 +91,24 @@ public class CartService {
 			return new ErrorDataResult<Cart>();
 		}
 	}
+	
+	public Result deleteCart(long cartId) {
+		try {
+			String address = String.format(
+					"http://localhost:8080/FinalProjectBackend/api/carts/remove?cartId=%d", cartId);
+			HttpURLConnection connection = (HttpURLConnection) WebHelper.connect(address);
+			Document document = null;
+			if( connection.getResponseCode() == 200) {
+				document = XmlHelper.parse(connection.getInputStream());
+				Result result = ResultXml.parse(document);
+				return new SuccessResult(result.getMessage());
+			}else {
+				document = XmlHelper.parse(connection.getErrorStream());
+				Result result = ResultXml.parse(document);
+				return new ErrorResult(result.getMessage());
+			}
+		}catch(Exception e) {
+			return new ErrorResult();
+		}
+	}
 }
