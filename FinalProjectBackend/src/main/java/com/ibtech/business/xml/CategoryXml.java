@@ -17,16 +17,6 @@ public class CategoryXml {
 		return document;
 	}
 	
-//	public static Player parse(Document document) {
-//		Element root = document.getDocumentElement();
-//		long playerId = (long) XmlHelper.getSingleElementText(root, "playerId", 0);
-//		String playerName = XmlHelper.getSingleElementText(root, "playerName", "");
-//		double averageScore = Double.parseDouble(XmlHelper.getSingleElementText(root, "averageScore", "0"));
-//		
-//		Player player = new Player(playerId,playerName,averageScore);
-//		return player;
-//	}
-
 	public static Document formatAll(List<Category> categories) throws Exception {
 		Document document = XmlHelper.create("categories");
 		Element root = document.getDocumentElement();

@@ -109,6 +109,14 @@ public class ProductManager implements ProductService{
 		}
 	}
 
-	
+	@Override
+	public DataResult<Integer> getCount() {
+		try {
+			return new SuccessDataResult<Integer>(productRepository.getCount());
+		}catch(Exception e) {
+			e.printStackTrace();
+			return new ErrorDataResult<Integer>();
+		}
+	}
 
 }

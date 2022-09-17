@@ -83,6 +83,21 @@ public class CartManager implements CartService {
 			return new ErrorDataResult<Cart>(ShoppingResultMessage.ErrorMessage);
 		}
 	}
+
+	@Override
+	public Result delete(long cartId) {
+		try {
+			DataResult<Cart> dbCart = getById(cartId);
+			if(!dbCart.isSuccess()) {
+				return new ErrorResult(ShoppingResultMessage.CartNotFound);
+			}
+			boolean updatedResult = cartRepository.delete(cartId);
+			return updatedResult ? new SuccessResult(ShoppingResultMessage.CartDeleted) : new ErrorResult(ShoppingResultMessage.CartCouldNotDeleted);
+		}catch(Exception e) {
+			e.printStackTrace();
+			return new ErrorResult(ShoppingResultMessage.ErrorMessage);
+		}
+	}
 	
 	
 

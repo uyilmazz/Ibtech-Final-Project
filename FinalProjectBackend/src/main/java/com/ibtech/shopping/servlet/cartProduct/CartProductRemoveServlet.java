@@ -23,13 +23,11 @@ public class CartProductRemoveServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		try {
-			System.out.println("Delete Servlet");
 			boolean isLong = ParseHelper.isLong(request.getParameter("cartProductId"));
 			Document document;
 			if(isLong) {
 				CartProductService cartProductService = new CartProductManager(new CartProductRepository());
 				long cartProductId = Long.parseLong(request.getParameter("cartProductId"));
-				System.out.println(cartProductId);
 				Result deletedResult  = cartProductService.delete(cartProductId);
 				if(deletedResult.isSuccess()) {
 					document = XmlHelper.resultDocument(response, deletedResult, 200);

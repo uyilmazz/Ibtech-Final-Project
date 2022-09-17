@@ -13,10 +13,18 @@
 	ProductService productService = new ProductService();
 	if(request.getParameter("categoryId") != null && ParseHelper.isInteger(request.getParameter("categoryId"))){
 		int categoryId = Integer.parseInt( request.getParameter("categoryId"));
-		result = productService.getByCategoryId(categoryId);
-		if(result.isSuccess()){
-			products = result.getData();
+		if(categoryId >= 0){
+			result = productService.getByCategoryId(categoryId);
+			if(result.isSuccess()){
+				products = result.getData();
+			}
+		}else{
+			result = productService.getLimitedData(limit);
+			if(result.isSuccess()){
+				products = result.getData();
+			}
 		}
+		
 	}else{
 		result = productService.getLimitedData(limit);
 		if(result.isSuccess()){
@@ -28,12 +36,11 @@
 	<%if(result.isSuccess()) {%>
 		<div class="row mt-3">
 		<%for (int i = 0; i < products.size(); i += 1) {%>
-	    	 <div class="card mx-3" style="width: 18rem;">
-				  <img src="..." class="card-img-top">
+	    	 <div class="card mx-3 mt-2" style="width: 18rem;">
+				  <img height="300" src="<%=products.get(i).getImagePath() %>" class="card-img-top mt-2">
 				  <div class="card-body">
-				    <h5 class="card-title"><a href="ProductView.jsp?productId=<%=products.get(i).getProductId() %>"><%= products.get(i).getProductName() %></a></h5>
+				    <h5 class="card-title"><a style="text-decoration: none;" href="ProductView.jsp?productId=<%=products.get(i).getProductId() %>"><%= products.get(i).getProductName() %></a></h5>
 				    <p class="card-text"><%= products.get(i).getSalesPrice()%> TL</p>
-				    <a href="#" class="btn btn-primary">Add to Cart</a>
 				  </div>
 			</div>		
 		<%}%>

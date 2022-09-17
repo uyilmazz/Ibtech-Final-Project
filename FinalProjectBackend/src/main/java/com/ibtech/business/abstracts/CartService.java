@@ -12,5 +12,6 @@ public interface CartService {
 	public DataResult<Cart> getByUserName(String userName);
 	public DataResult<Cart> create(Cart cart);
 	public Result update(Cart cart);
+	public Result delete(long cartId);
 	
 }

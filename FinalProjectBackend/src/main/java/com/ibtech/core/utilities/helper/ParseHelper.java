@@ -17,4 +17,12 @@ public class ParseHelper {
 	    } catch (NumberFormatException nfe) {}
 	    return false;
 	}
+	
+	public static boolean isBoolean(String str) {
+		try {
+	        Boolean.parseBoolean(str);
+	        return true;
+	    } catch (NumberFormatException nfe) {}
+	    return false;
+	}
 }

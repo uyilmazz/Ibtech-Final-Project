@@ -9,7 +9,7 @@ public interface UserService {
 	public DataResult<List<User>> getAll();
 	public DataResult<User> getById(long id);
 	public DataResult<User> getByUserName(String name);
-	
+	public DataResult<Integer> getCount();
 	public DataResult<User> check(User user);
 	public DataResult<User> add(User user);
 }

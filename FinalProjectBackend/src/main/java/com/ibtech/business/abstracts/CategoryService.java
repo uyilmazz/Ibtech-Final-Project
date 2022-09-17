@@ -10,6 +10,8 @@ public interface CategoryService {
 	public DataResult<List<Category>> getAll() throws Exception;
 	public DataResult<Category> getById(int categoryId);
 	
+	public DataResult<Integer> getCount();
+	
 	public Result add(Category category);
 	public Result update(Category category);
 	public Result delete(int categoryId);

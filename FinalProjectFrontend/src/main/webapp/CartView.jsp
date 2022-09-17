@@ -112,7 +112,7 @@ if(session.getAttribute("userName") != null){
 															<img
 																src="<%= cartProductList.get(i).getProduct().getImagePath() %>"
 																class="img-fluid rounded-3" alt="Shopping item"
-																style="width: 65px;">
+																style="width: 65px; height:85px;">
 														</div>
 														<div class="ms-3">
 															<div style="width: 250px;">
@@ -167,7 +167,7 @@ if(session.getAttribute("userName") != null){
 												</div>
 
 												<a type="button"  href="./Checkout.jsp?cartId=<%=cart.getId()%>"
-												class="btn btn-info btn-block btn-lg">
+												class="btn btn-info btn-block btn-lg <%= cartProductList.size() == 0 ? "disabled" : "" %>">
 													<div class="d-flex justify-content-between">
 														<span>Checkout <i
 															class="fas fa-long-arrow-alt-right ms-2"></i></span>

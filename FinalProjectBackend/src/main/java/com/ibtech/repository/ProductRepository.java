@@ -3,52 +3,68 @@ package com.ibtech.repository;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.ibtech.entities.Category;
 import com.ibtech.entities.Product;
 
-public class ProductRepository extends BaseRepository<Product>{
-	
-	public List<Product> getAll() throws SQLException{
+public class ProductRepository extends BaseRepository<Product> {
+
+	public List<Product> getAll() throws SQLException {
 		String sql = "select p.id as id,p.\"name\" ,p.sales_price ,p.image_path,p.category_id ,c.\"name\" as category_name from products p join categories c on p.category_id = c.id ";
 		return super.listAll(sql);
 	}
 	
+	public Integer getCount() throws SQLException {
+		int count = 0;
+		connect();
+		String sql = "Select count(*) from products";
+		PreparedStatement statement = connection.prepareStatement(sql);
+		ResultSet resultSet = statement.executeQuery();
+		if(resultSet.next()) {
+			count = resultSet.getInt("count");
+		}
+		disconnect();
+		return count;
+	}
+
 	public Product getById(long productId) throws SQLException {
 		String sql = "select p.id as id,p.\"name\" ,p.sales_price ,p.image_path,p.category_id ,c.\"name\" as category_name from products p join categories c on p.category_id = c.id  where p.id = ?";
 		return super.find(sql, productId);
 	}
-	
-	public List<Product> getByCategory(int category_id) throws SQLException{
+
+	public List<Product> getByCategory(int category_id) throws SQLException {
+		List<Product> productList = new ArrayList<>();
 		connect();
 		String sql = "select p.id as id,p.\"name\" ,p.sales_price ,p.image_path,p.category_id ,c.\"name\" as category_name from products p join categories c on p.category_id = c.id  where p.category_id = ?";
 		PreparedStatement statement = connection.prepareStatement(sql);
 		statement.setInt(1, category_id);
 		ResultSet resultSet = statement.executeQuery();
+		productList = parseList(resultSet);
 		disconnect();
-		List<Product> productList = parseList(resultSet);
 		return productList;
 	}
-	
-	public List<Product> getByLimit(int limit) throws SQLException{
+
+	public List<Product> getByLimit(int limit) throws SQLException {
+		List<Product> productList = new ArrayList<>();
 		connect();
 		String sql = "select p.id as id,p.\"name\" ,p.sales_price ,p.image_path,p.category_id ,c.\"name\" as category_name from products p join categories c on p.category_id = c.id  order by p.id desc limit ?";
 		PreparedStatement statement = connection.prepareStatement(sql);
 		statement.setInt(1, limit);
 		ResultSet resultSet = statement.executeQuery();
+		productList = parseList(resultSet);
 		disconnect();
-		List<Product> productList = parseList(resultSet);
 		return productList;
 	}
-	
+
 	public Product findByName(String name) throws SQLException {
 		String sql = "select p.id as id,p.\"name\" ,p.sales_price ,p.image_path,p.category_id ,c.\"name\" as category_name from products p join categories c on p.category_id = c.id  where p.name = ?";
 		return super.findByName(sql, name);
 	}
 
 	public boolean add(Product product) throws SQLException {
-		connect();		
+		connect();
 		String sql = "insert into products(name,sales_price,image_path,category_id) values(?,?,?,?)";
 		PreparedStatement statement = connection.prepareStatement(sql);
 		statement.setString(1, product.getProductName());
@@ -59,7 +75,7 @@ public class ProductRepository extends BaseRepository<Product>{
 		disconnect();
 		return affected > 0 ? true : false;
 	}
-	
+
 	public boolean update(Product product) throws SQLException {
 		connect();
 		String sql = "Update products set name = ?,sales_price = ? , image_path = ? , category_id = ? where id = ?";
@@ -73,7 +89,7 @@ public class ProductRepository extends BaseRepository<Product>{
 		disconnect();
 		return affected > 0 ? true : false;
 	}
-	
+
 	public boolean delete(long productId) throws SQLException {
 		connect();
 		String sql = "Delete from products where id = ?";
@@ -83,7 +99,7 @@ public class ProductRepository extends BaseRepository<Product>{
 		disconnect();
 		return affected > 0 ? true : false;
 	}
-	
+
 	@Override
 	protected Product parse(ResultSet resultSet) throws SQLException {
 		Long productId = resultSet.getLong("id");
@@ -92,11 +108,10 @@ public class ProductRepository extends BaseRepository<Product>{
 		double salesPrice = resultSet.getDouble("sales_price");
 		int categoryId = resultSet.getInt("category_id");
 		String categoryName = resultSet.getString("category_name");
-		Category category = new Category(categoryId,categoryName);
-		Product product = new Product(productId,productName,imagePath,salesPrice);
+		Category category = new Category(categoryId, categoryName);
+		Product product = new Product(productId, productName, imagePath, salesPrice);
 		product.setCategory(category);
 		return product;
 	}
-	
-	
+
 }
